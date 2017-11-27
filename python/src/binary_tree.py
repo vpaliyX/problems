@@ -18,10 +18,10 @@ class BinaryTree():
     # Add function using the iterative approach to prevent stack overhead
     def _add(self, data):
         node=TreeNode(data)
-        if self.root != None:
+        if self.root:
             temp=self.root
             parent=self.root
-            while temp!=None:
+            while temp:
                 parent=temp
                 # no duplicates allowed
                 if temp.data == data: return
@@ -37,9 +37,9 @@ class BinaryTree():
         self.size+=1
 
     def _search(self, target):
-        if self.root!=None:
+        if self.root:
             temp=self.root
-            while temp!=None:
+            while temp:
                 if temp.data == target:
                     return temp
                 temp=temp.left if comparator(temp.data, target) else temp.right
@@ -47,20 +47,20 @@ class BinaryTree():
 
     def _min(self):
         temp=self.root
-        while temp !=None and temp.left!=None:
+        while temp and temp.left:
             temp=temp.left
         return temp
 
     def _max(self):
         temp=self.root
-        while temp!=None and temp.right!=None:
+        while temp and temp.right:
             temp=temp.right
         return temp
 
     def _depth(self):return self.__depth__(self.root)
 
     def __depth__(self, node=None):
-        if node == None:
+        if not node:
             return 0
         return max(self.__depth__(node.left,level)+1, self.__depth__(node.right,level)+1)
 
@@ -69,7 +69,7 @@ class BinaryTree():
             self.__mirror__(self.root)
 
     def __mirror__(self, node):
-        if node != None:
+        if node
             left=node.left
             node.left=node.right
             node.right=left
@@ -78,41 +78,41 @@ class BinaryTree():
 
     def _delete(self, data):
         target=self.search(data)
-        if target != None:
+        if target:
             # save the parent of the target
             parent=target.parent
             successor=None
             self.size-=1
             # if the right node is not null, then traverse to find the smallest node
-            if target.right!=None:
+            if target.right:
                 successor=target.right
                 # traverse the subtree to find the smallest node
-                while successor.left !=None:
+                while successor.left:
                     successor=successor.left
                 # modify the parent of the smallest node
                 if successor.parent is not target:
                     successor.parent.left=successor.right
                     # If the successor has children, change their parent
-                    if successor.right!=None:
+                    if successor.right:
                         successor.right.parent=successor.parent
                 successor.parent=parent
                 # since the successor came from the right subtree, it should become the parent of the left
-                if target.left!=None:
+                if target.left:
                     target.left.parent=successor
             # if the right is null, then find the biggest value in the left subtree
-            elif target.left!=None:
+            elif target.left:
                 successor=target.left
                 # Finding the greatest value
-                while successor.right!=None:
+                while successor.right:
                     successor=successor.right
                 # Modify the parent of the biggest value
                 if successor.parent is not target:
                     successor.parent.right=successor.left
                     # If the successor has children, change their parent
-                    if successor.left!=None:
+                    if successor.left:
                         successor.left.parent=successor.parent
                 successor.parent=parent
-            if successor!=None:
+            if successor:
                 successor.left=target.left
                 successor.right=target.right
             if self.root is target:
