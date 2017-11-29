@@ -1,42 +1,28 @@
-
-# [1,2,3,4,5,6,7,9] => [9,]
+# Created By Vasyl Paliy
+# 2017
 
 class BinaryHeap():
-    def __init__(self, data=None, comparator=lambda x,y:x < y):
-        self.heap=data or []
+    def __init__(self, container=None, comparator=lambda x,y: x < y):
+        self.container=container or []
         self.comparator=comparator
+        for index in xrange(len(self.container) / 2 -1, -1, -1):
+            self.__down(index)
 
-    def _insert(self, item):
-        self.heap.append(item)
-        index = len(self.heap)-1
-        while index != 0:
-            if self.__compare(index >> 1, index) != index:
-                self.__swap(index >> 1,index)
-            index=index >> 1
+    def insert(self, item):
+        self.container.append(item)
+        index = len(self.container)-1
+        while index > 0:
+            parent = self.__parent(index)
+            if self.comparator(self.container[parent], self.container[index]):
+                self.__swap(parent, index)
+                index = parent
+                continue
+            return
 
-    def __heapify(self,index):
-        left=self.__left(index)
-        right=self.__right(index)
-        length=len(self.heap)
-        while left < length:
-            final=index
-            final=self.__compare(index, left)
-            if right < length:
-                final=self.__compare(final, right)
-            if final == index:
-                return
-            self.__swap(final,index)
-            index=final
-            left=self.__left(index)
-            right=self.__right(index)
-
-    def __swap(self, first, second):
-        temp=self.heap[first]
-        self.heap[first]=self.heap[second]
-        self.heap[second]=temp
-
-    def __compare(self, x, y):
-        return x if self.comparator(self.heap[x], self.heap[y]) else y
+    def __swap(self, x, y):
+        temp=self.container[x]
+        self.container[x]=self.container[y]
+        self.container[y]=temp
 
     def __left(self, index):
         return (index << 1) + 1
@@ -44,5 +30,34 @@ class BinaryHeap():
     def __right(self, index):
         return (index << 1) + 2
 
-    def _is_empty(self):
-        return index == 0
+    def __parent(self, index):
+        return index >> 1 if (index % 2) else (index >> 1) -1
+
+    def __compare(self, x, y):
+        if x < self.size() and y < self.size():
+            return y if self.comparator(self.container[x], self.container[y]) else x
+        return x
+
+    def top(self):
+        result = self.container[0]
+        self.__swap(0,self.size()-1)
+        self.container=self.container[:-1]
+        self.__down(0)
+        return result
+
+    def __down(self, index):
+        while True:
+            left = self.__left(index)
+            right = self.__right(index)
+            result = self.__compare(index, left)
+            result = self.__compare(result, right)
+            if result == index:
+                return
+            self.__swap(result, index)
+            index = result
+
+    def size(self):
+        return len(self.container)
+
+    def is_empty(self):
+        return self.size() == 0
