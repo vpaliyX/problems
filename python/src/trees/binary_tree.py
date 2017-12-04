@@ -122,8 +122,7 @@ class BinarySearchTree():
                     parent.right=successor
             if successor:
                 successor.parent=parent
-
-    
+                
 def max_node(node):
     while node and node.right:
         node=node.right
