@@ -94,55 +94,36 @@ class BinarySearchTree():
                 return False
         return True
 
-
-    def _delete(self, data):
-        target=self.search(data)
-        if target:
-            # save the parent of the target
-            parent=target.parent
+    def delete_node(self, key):
+        target=self.search(key)
+        if self.root is target:
+            del self.root
+        elif target:
             successor=None
+            parent=target.parent
             self.size-=1
-            # if the right node is not null, then traverse to find the smallest node
-            if target.right:
+            # if true, then extract the very left child of the right subtree
+            if target.left and target.right:
                 successor=target.right
-                # traverse the subtree to find the smallest node
+                # navigate to the left tree
                 while successor.left:
                     successor=successor.left
-                # modify the parent of the smallest node
+                # if the successor is not the right node of the target
                 if successor.parent is not target:
                     successor.parent.left=successor.right
-                    # If the successor has children, change their parent
                     if successor.right:
                         successor.right.parent=successor.parent
-                successor.parent=parent
-                # since the successor came from the right subtree, it should become the parent of the left
-                if target.left:
-                    target.left.parent=successor
-            # if the right is null, then find the biggest value in the left subtree
-            elif target.left:
-                successor=target.left
-                # Finding the greatest value
-                while successor.right:
-                    successor=successor.right
-                # Modify the parent of the biggest value
-                if successor.parent is not target:
-                    successor.parent.right=successor.left
-                    # If the successor has children, change their parent
-                    if successor.left:
-                        successor.left.parent=successor.parent
-                successor.parent=parent
+            elif target.left or target.right:
+                successor=target.left if target.left else target.right
+            if parent:
+                if parent.left is target:
+                    parent.left=successor
+                else:
+                    parent.right=successor
             if successor:
-                successor.left=target.left
-                successor.right=target.right
-            if self.root is target:
-                self.root=successor
-                return
-            if parent.left is target:
-                parent.left=successor
-            else:
-                parent.right=successor
+                successor.parent=parent
 
-
+    
 def max_node(node):
     while node and node.right:
         node=node.right
