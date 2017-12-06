@@ -8,7 +8,6 @@ class TreeNode():
         self.right=right
         self.parent=parent
 
-
 class BinarySearchTree():
     def __init__(self, comparator=lambda x,y: x > y):
         self.root=None
@@ -122,7 +121,7 @@ class BinarySearchTree():
                     parent.right=successor
             if successor:
                 successor.parent=parent
-                
+
 def max_node(node):
     while node and node.right:
         node=node.right
