@@ -18,7 +18,7 @@ class LRUCache():
         self.elements={}
 
     def _put(self, key, element):
-        # if the cache is overloaded, delete the least used item
+        # if there is already the item, move it up front 
         if self.elements.has_key(key):
             node=self.elements[key]
             node.element=element
