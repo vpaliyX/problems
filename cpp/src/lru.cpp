@@ -1,23 +1,8 @@
-#ifndef __LRU_HPP__
-#define __LRU_HPP__
-#include <map>
-template<class K, class V>
-struct node {
-  K key;
-  V value;
-  node(K key, V value);
-};
+#include "lru.hpp"
 
-template<class K, class V>
-class lru {
-  node<K,V>* head;
-  map<K,Node<K,V>> map;
-public:
-   lru();
-  ~lru();
-
-  void put(K key, V value);
-  V get(K key);
-};
-
-#endif
+int main(int argc, char** argv) {
+  lru<int,int> cache(10);
+  cache.put(1,2);
+  std::cout<<cache.get(1)<<std::endl;
+  return 1;
+}
