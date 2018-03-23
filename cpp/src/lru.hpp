@@ -12,7 +12,9 @@ struct node {
   V value;
   node<K,V>* next;
   node<K,V>* prev;
-  node(K key, V value, node<K,V>* next = nullptr, node<K,V>* prev = nullptr);
+  node(K key, V value,
+      node<K,V>* next = nullptr,
+      node<K,V>* prev = nullptr);
 };
 
 template<class K, class V>
@@ -22,15 +24,16 @@ class lru {
   node<K,V>* tail;
   std::map<K,node<K,V>*> map;
   std::size_t capacity;
-  void bump_up(node<K,V>*);
+  void bump(node<K,V>*);
+  void pop();
  public:
   explicit lru(std::size_t);
-  void put(K key, V value);
-  V get(K key);
+  void put(const K &key, const V &value);
+  V get(const K &key);
 };
 
 template<class K, class V>
-node<K,V>::node(K key, V value, node<K,V>* next, node<K,V>* prev)
+inline node<K,V>::node(K key, V value, node<K,V>* next, node<K,V>* prev)
     : key {std::move(key)}
     , value {std::move(value)}
     , next(next)
@@ -38,32 +41,28 @@ node<K,V>::node(K key, V value, node<K,V>* next, node<K,V>* prev)
 {}
 
 template<class K, class V>
-inline lru<K,V>::lru(std::size_t capacity) {
-  assert(capacity > 1);
-  this->capacity = capacity;
-  this->head = tail = nullptr;
+inline lru<K,V>::lru(std::size_t capacity)
+    : capacity(capacity)
+    , head(nullptr)
+    , tail(nullptr) {
+        assert(capacity > 1);
 }
 
 template<class K, class V>
-void lru<K,V>::put(K key, V value) {
+void lru<K,V>::put(const K &key, const V &value) {
   auto it = map.find(key);
   if (it != map.end()) {
     auto temp = it->second;
     temp->value = value;
-    bump_up(temp);
+    bump(temp);
     return;
   }
 
-  if(capacity == map.size()) {
-    tail->prev->next = tail->next;
-    auto target = tail;
-    map.erase(target->key);
-    tail = tail->prev;
-    delete target;
-  }
+  if (capacity == map.size())
+    pop();
 
   auto temp = new node<K,V>(key, value, head);
-  if(head != nullptr)
+  if (head != nullptr)
     head->prev = temp;
   else
     tail = temp;
@@ -72,17 +71,26 @@ void lru<K,V>::put(K key, V value) {
 }
 
 template<class K, class V>
-V lru<K,V>::get(K key) {
+void lru<K,V>::pop() {
+  tail->prev->next = tail->next;
+  map.erase(tail->key);
+  tail = tail->prev;
+  delete tail->next;
+  tail->next = nullptr;
+}
+
+template<class K, class V>
+V lru<K,V>::get(const K &key) {
   auto it = map.find(key);
-  if(it != map.end()) {
-    bump_up(it->second);
+  if (it != map.end()) {
+    bump(it->second);
     return it->second->value;
   }
   return V {};
 }
 
 template<class K, class V>
-void lru<K,V>::bump_up(node<K,V>* temp) {
+void lru<K,V>::bump(node<K,V>* temp) {
   if (temp->prev != nullptr)
     temp->prev->next = temp->next;
   if (temp->next != nullptr)
