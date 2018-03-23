@@ -1,75 +1,115 @@
 #ifndef __BST_HPP__
 #define __BST_HPP__
 #include<iostream>
+#include<iterator>
 
-template<class T>
-struct Default {
-  T value;
-  Default():value(){}
-};
+namespace BST  {
 
 template<class K, class V>
 struct node {
   node<K,V>* parent;
   node<K,V>* left;
   node<K,V>* right;
-  K key;
-  V value;
-  explicit node(K key, V value);
+  const K key;
+  const V value;
+
+  explicit node(K, V,
+      node<K,V>* = nullptr,
+      node<K,V>* = nullptr,
+      node<K,V>* = nullptr);
 };
 
 template<class K, class V>
 class bst {
  private:
    node<K,V>* root;
-   std::size_t count;
-   void transplant(node<K,V>*, node<K,V>*);
-   node<K,V>* _search(K);
    node<K,V>* _min();
    node<K,V>* _max();
- public:
-   explicit bst();
-   void put(K, V);
-   void remove(K);
-   V search(K);
-   V min();
+   node<K,V>* _find(const K&);
+   void transplant(node<K,V>*, node<K,V>*);
+  public:
    V max();
+   V min();
+   V find(const K&);
+   void remove(const K&);
+   void insert(const K&, const V&);
 };
 
 template<class K, class V>
-inline node<K,V>::node(K key, V value) {
-  this->key = key;
-  this->value = value;
+inline node<K,V>::node(K key, V value, node<K,V>* parent, node<K,V>* left, node<K,V>* right)
+    : key {std::move(key)}
+    , value {std::move(value)}
+    , parent(parent)
+    , left(left)
+    , right(right)
+{}
+
+template<class K, class V>
+node<K,V>* bst<K,V>::_min() {
+  auto it = root;
+  if (root != nullptr) {
+    while (it->left != nullptr)
+      it = it->left;
+  }
+  return it;
 }
 
 template<class K, class V>
-inline bst<K,V>::bst(){}
+node<K,V>* bst<K,V>::_max() {
+  auto it = root;
+  if (root != nullptr) {
+    while (it->right != nullptr)
+      it = it->right;
+  }
+  return it;
+}
 
 template<class K, class V>
-void bst<K,V>::put(K key, V value) {
-  auto temp = root;
+node<K,V>* bst<K,V>::_find(const K &key) {
+  auto it = root;
+  while (it != nullptr) {
+    if (it->key == key)
+      return it;
+    it = it->key >= key ? it->left : it->right;
+  }
+  return it;
+}
+
+template<class K, class V>
+V bst<K,V>::find(const K& key) {
+  auto it = _find(key);
+  return it != nullptr ? it->value : V {};
+}
+
+template<class K, class V>
+V bst<K,V>::max() {
+  auto it = _max();
+  return it != nullptr ? it->value : V {};
+}
+
+template<class K, class V>
+V bst<K,V>::min() {
+  auto it = _min();
+  return it != nullptr ? it->value : V {};
+}
+
+template<class K, class V>
+void bst<K,V>::insert(const K &key, const V &value) {
+  if (root == nullptr) {
+    root = new node<K,V>(key, value);
+    return root;
+  }
   auto parent = root;
-  auto target = new node<K,V>(key, value);
-  while (temp != nullptr) {
-    parent = temp;
-    temp = temp->key >= key ? temp->left : temp->right;
+  auto it = root;
+  while (it != nullptr) {
+    parent = it;
+    it = it->key < key ? it->right : it->left;
   }
-  if (parent->key >= key)
-    parent->left = target;
+  auto target = new node<K,V>(it->key, it->value, parent);
+  if (parent->key < key)
+    parent->right =target;
   else
-    parent->right = target;
-  target->parent = parent;
-}
-
-template<class K, class V>
-node<K,V>* bst<K,V>::_search(K key) {
-  auto temp = root;
-  while (temp != nullptr) {
-    if (temp->key == key)
-      return temp;
-    temp = temp->key >= key ? temp->left : temp->right;
-  }
-  return temp;
+    parent->left = target;
 }
 
 template<class K, class V>
@@ -87,47 +127,7 @@ void bst<K,V>::transplant(node<K,V>* first, node<K,V>* second) {
 }
 
 template<class K, class V>
-node<K,V>* bst<K,V>::_max() {
-  if (root != nullptr) {
-    auto max = root;
-    while (max->right != nullptr)
-      max = max->right;
-    return max;
-  }
-  return nullptr;
-}
-
-template<class K, class V>
-node<K,V>* bst<K,V>::_min() {
-  if (root != nullptr) {
-    auto max = root;
-    while (max->left != nullptr)
-      max = max->left;
-    return max;
-  }
-  return nullptr;
-}
-
-template<class K, class V>
-inline V bst<K,V>::min() {
-  auto min = _min();
-  return min != nullptr ? min->value : Default<V>().value;
-}
-
-template<class K, class V>
-inline V bst<K,V>::max() {
-  auto max = _max();
-  return max != nullptr ? max->value : Default<V>().value;
-}
-
-template<class K, class V>
-inline V bst<K,V>::search(K key) {
-  auto target = _search(key);
-  return target != nullptr ? target->value : Default<V>().value;
-}
-
-template<class K, class V>
-void bst<K,V>::remove(K key) {
+void bst<K,V>::remove(const K &key) {
   auto target = _search(key);
   if (target != nullptr) {
     auto successor = target->left;
@@ -152,5 +152,7 @@ void bst<K,V>::remove(K key) {
     }
     delete target;
   }
+}
+
 }
 #endif
