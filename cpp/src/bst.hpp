@@ -152,7 +152,7 @@ void bst<K,V>::remove(const K &key) {
     }
     delete target;
   }
-}
+}4
 
 }
 #endif
